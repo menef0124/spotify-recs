@@ -1,2 +1,3 @@
 /.cache
 /credentials.json
+/__pycache__
