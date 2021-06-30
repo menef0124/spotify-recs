@@ -1,14 +1,25 @@
+from flask import Blueprint
+from flask import flash
+from flask import g
+from flask import redirect
+from flask import render_template
+from flask import request
+from flask import url_for
+from werkzeug.exceptions import abort
 import spotipy
 import json
 import os
 from spotipy.oauth2 import SpotifyOAuth
-#from flask import Flask, request
 
-#app = Flask(__name__)
+bp = Blueprint('main', __name__)
+
+@bp.route('/')
+def index():
+    return render_template('base.html')
 
 
-#@app.route('/', method=['POST'])
-def recommendations():
+@bp.route('/submit', methods=['POST'])
+def generateRecs():
     #Retrieves client credentials to generate access token
     credsFile = open("credentials.json")
     creds = json.load(credsFile)
@@ -20,7 +31,7 @@ def recommendations():
     clear()
 
     #Gets username from user input
-   # username = request.form('username')
+    username = request.form['username']
 
 
     #Define audio feature variables
@@ -131,4 +142,4 @@ def recommendations():
     #Adds all recommendation tracks to the playlist
     sp.user_playlist_add_tracks(user=username, playlist_id=newPl['id'], tracks=recIds)
 
-    print("Done! Happy listening!")
+    return "Done! Happy listening!"
