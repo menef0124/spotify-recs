@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Recommendation Playlist Generator</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+        <style>
+            html{
+                height: 100%;
+            }
+            body{
+                background: #1EB955;
+                background: -webkit-linear-gradient(top, #1EB955, #1A1515);
+                background: -moz-linear-gradient(top, #1EB955, #1A1515);
+                background: linear-gradient(to bottom, #1EB955, #1A1515);
+                height: 100%;
+                margin: 0;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                text-align: center;
+            }
+
+            .center_div{
+                margin: 0 auto;
+                width: 30%
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1 style="color: white;">Spotify Recommendation Playlist Generator</h1>
+        <br><br>
+        <h3 style="color: white;">Please enter your Spotify Username:</h3>
+        <form class="center_div" action="../main.py" method="POST">
+            <div class="input-group-lg">
+                <input type="text" class="form-control" placeholder="Username" id="username" name="username">
+                <br>
+                <button type="submit" class="btn-lg btn-info">Submit</button>
+            </div>
+        </form>
+
+    </body>
+</html>

@@ -1,6 +1,7 @@
 import spotipy
 import json
 import os
+from flask import Flask, request
 from spotipy.oauth2 import SpotifyOAuth
 
 #Retrieves client credentials to generate access token
@@ -8,14 +9,14 @@ credsFile = open("credentials.json")
 creds = json.load(credsFile)
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=creds["client_id"], client_secret=creds["client_secret"], redirect_uri=creds["redirect_uri"], scope="user-library-read,user-top-read,playlist-modify-public,playlist-modify-private"))
 
-#Uncomment this definition when post requests from the webpage to this script is written
-#def post(self):
 
+#Uncomment this definition when post requests from the webpage to this script is written
 clear = lambda: os.system('cls')
 clear()
 
 #Gets username from user input
-username = input("Enter username: ")#json.loads(self.post('data')) <--- switch out input() with this when post requests work
+username = input("Enter username: ") #request.form('username')
+
 
 #Define audio feature variables
 acoustic = 0.0
