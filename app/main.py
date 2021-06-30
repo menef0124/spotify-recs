@@ -9,7 +9,7 @@ from werkzeug.exceptions import abort
 import spotipy
 import json
 import os
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyImplicitGrant, SpotifyOAuth, SpotifyPKCE
 
 bp = Blueprint('main', __name__)
 
@@ -23,7 +23,8 @@ def generateRecs():
     #Retrieves client credentials to generate access token
     credsFile = open("credentials.json")
     creds = json.load(credsFile)
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=creds["client_id"], client_secret=creds["client_secret"], redirect_uri=creds["redirect_uri"], scope="user-library-read,user-top-read,playlist-modify-public,playlist-modify-private"))
+    sp = spotipy.Spotify(auth_manager=SpotifyPKCE(client_id=creds['client_id'],redirect_uri=creds['redirect_uri'], scope="user-library-read,user-top-read,playlist-modify-public,playlist-modify-private", username=request.form['username']))
+    #sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=creds["client_id"], client_secret=creds["client_secret"], redirect_uri=creds["redirect_uri"], scope="user-library-read,user-top-read,playlist-modify-public,playlist-modify-private"))
 
 
     #Uncomment this definition when post requests from the webpage to this script is written
