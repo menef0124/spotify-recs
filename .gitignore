@@ -1,5 +1,4 @@
 /.cache
-/app/credentials.json
 /__pycache__
 venv/
 *.pyc
@@ -15,3 +14,4 @@ build/
 .idea/
 *.swp
 *~
+/credentials.json

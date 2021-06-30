@@ -142,4 +142,7 @@ def generateRecs():
     #Adds all recommendation tracks to the playlist
     sp.user_playlist_add_tracks(user=username, playlist_id=newPl['id'], tracks=recIds)
 
-    return "Done! Happy listening!"
+    return f'''
+    Done! Happy listening!<br>
+    <a href="https://open.spotify.com/playlist/{newPl["id"]}">Here is the link to your playlist!</a>
+    '''
