@@ -5,14 +5,19 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-import requests
 from werkzeug.exceptions import abort
 import spotipy
 import json
 import os
-from spotipy.oauth2 import SpotifyImplicitGrant, SpotifyOAuth, SpotifyPKCE
+from spotipy.oauth2 import SpotifyPKCE
 
 bp = Blueprint('main', __name__)
+
+def clear():
+    if os.name == 'nt':
+        _ = os.system('cls')
+    else:
+        _ = os.system('clear')
 
 @bp.route('/')
 def index():
@@ -21,20 +26,16 @@ def index():
 
 @bp.route('/submit', methods=['POST'])
 def generateRecs():
+    
+    clear()
+
     #Retrieves client credentials to generate access token
     credsFile = open("credentials.json")
     creds = json.load(credsFile)
     sp = spotipy.Spotify(auth_manager=SpotifyPKCE(client_id=creds['client_id'],redirect_uri=creds['redirect_uri'], scope="user-library-read,user-top-read,playlist-modify-public,playlist-modify-private", username=request.form['username']))
-    #sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=creds["client_id"], client_secret=creds["client_secret"], redirect_uri=creds["redirect_uri"], scope="user-library-read,user-top-read,playlist-modify-public,playlist-modify-private"))
-
-
-    #Uncomment this definition when post requests from the webpage to this script is written
-    clear = lambda: os.system('cls')
-    clear()
 
     #Gets username from user input
     username = request.form['username']
-
 
     #Define audio feature variables
     acoustic = 0.0
