@@ -13,11 +13,11 @@ from spotipy.oauth2 import SpotifyPKCE
 
 bp = Blueprint('main', __name__)
 
-def clear():
-    if os.name == 'nt':
-        _ = os.system('cls')
-    else:
-        _ = os.system('clear')
+#def clear():
+#    if os.name == 'nt':
+#        _ = os.system('cls')
+#    else:
+#        _ = os.system('clear')
 
 @bp.route('/')
 def index():
@@ -27,7 +27,7 @@ def index():
 @bp.route('/submit', methods=['POST'])
 def generateRecs():
     
-    clear()
+#    clear()
 
     #Retrieves client credentials to generate access token
     credsFile = open("credentials.json")
