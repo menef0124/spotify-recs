@@ -79,13 +79,16 @@ def generateRecs():
         tempo += features[0]['tempo']
         valence += features[0]['valence']
 
+        artist = item['artists'][0]['name'].encode("utf-16")
+        song = item['name'].encode("utf-16")
+
         #Basically hardcoded track and artist seeds
         if i < 1:
             trackSeed.append(item['id'])
             artistSeed.append(item['artists'][0]['id'])
         #Only prints first 10 tracks
         if i < 10:
-            print(i+1, item['artists'][0]['name'], "-", item['name'])
+            print(i+1, artist, "-", song)
     print("------------------------------------")
 
     #Get average audio feature values
