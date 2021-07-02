@@ -1,28 +1,30 @@
 import os
 from flask import Flask
 
-def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY="dev"
-    )
+#def create_app(test_config=None):
 
-    if test_config is None:
-        app.config.from_pyfile("config.py", silent=True)
+test_config = None
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_mapping(
+    SECRET_KEY="dev"
+)
 
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
+if test_config is None:
+    app.config.from_pyfile("config.py", silent=True)
 
-    @app.route('/hello')
-    def hello():
-        return "Hello, World!"
+try:
+    os.makedirs(app.instance_path)
+except OSError:
+    pass
 
-    from app import main
+@app.route('/hello')
+def hello():
+    return "Hello, World!"
 
-    app.register_blueprint(main.bp)
+from app import main
 
-    app.add_url_rule('/', endpoint='index')
+app.register_blueprint(main.bp)
 
-    return app
+app.add_url_rule('/', endpoint='index')
+
+   # return app
