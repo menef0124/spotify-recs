@@ -210,7 +210,8 @@ def generateRecs():
         target_speechiness="{:.2f}".format(speech),
         target_tempo="{:.2f}".format(tempo),
         target_valence="{:.2f}".format(valence),
-        limit=100)
+        limit=100,
+        )
 
     #Collects track IDs from recommendations
     recIds = []
