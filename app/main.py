@@ -1,38 +1,59 @@
 from flask import Blueprint
-from flask import flash
-from flask import g
-from flask import redirect
 from flask import render_template
-from flask import request
-from flask import url_for
-from werkzeug.exceptions import abort
+from flask import Flask, request, session, redirect
+from flask_session import Session
+from spotipy import cache_handler
 import spotipy
-import json
 import os
-from spotipy.oauth2 import SpotifyPKCE
+import uuid
+from spotipy.oauth2 import SpotifyClientCredentials
 
 bp = Blueprint('main', __name__)
 
-#def clear():
-#    if os.name == 'nt':
-#        _ = os.system('cls')
-#    else:
-#        _ = os.system('clear')
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.urandom(64)
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = './.flask_session/'
+Session(app)
+
+scope = "user-library-read,user-top-read,playlist-modify-public,playlist-modify-private"
+sp = None
+
+cachesFolder = './.spotifyCache/'
+
+if not os.path.exists(cachesFolder):
+    os.makedirs(cachesFolder)
+
+def session_cache_path():
+    return cachesFolder + session.get('uuid')
 
 @bp.route('/')
 def index():
+    if not session.get('uuid'):
+        session['uuid'] = str(uuid.uuid4())
+
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = spotipy.oauth2.SpotifyOAuth(scope=scope, cache_handler=cache_handler, show_dialog=True)
+
+    if request.args.get('code'):
+        auth_manager.get_access_token(request.args.get('code'))
+        return redirect('/')
+    
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        auth_url = auth_manager.get_authorize_url()
+        return redirect(auth_url)
+
+    global sp
+    sp = spotipy.Spotify(auth_manager=auth_manager)
+
     return render_template('base.html')
 
 
 @bp.route('/submit', methods=['POST'])
 def generateRecs():
-    
-#    clear()
 
-    #Retrieves client credentials to generate access token
-    credsFile = open("credentials.json")
-    creds = json.load(credsFile)
-    sp = spotipy.Spotify(auth_manager=SpotifyPKCE(client_id=creds['client_id'],redirect_uri=creds['redirect_uri'], scope="user-library-read,user-top-read,playlist-modify-public,playlist-modify-private", username=request.form['username']))
+    #Retrieves spotify client
+    global sp
 
     #Gets username from user input
     username = request.form['username']
@@ -69,6 +90,26 @@ def generateRecs():
     #Display top 10 tracks and accumulate audio feature values from all top 50 tracks
     for i, item in enumerate(res['items']):
         features = sp.audio_features(item['id'])
+        if i < 1:
+            minAcoustic = features[0]['acousticness']
+            minDanceable = features[0]['danceability']
+            minEnergy = features[0]['energy']
+            minInstrumental = features[0]['instrumentalness']
+            minLive = features[0]['liveness']
+            minLoud = features[0]['loudness']
+            minSpeech = features[0]['speechiness']
+            minTempo = features[0]['tempo']
+            minValence = features[0]['valence']
+            maxAcoustic = features[0]['acousticness']
+            maxDanceable = features[0]['danceability']
+            maxEnergy = features[0]['energy']
+            maxInstrumental = features[0]['instrumentalness']
+            maxLive = features[0]['liveness']
+            maxLoud = features[0]['loudness']
+            maxSpeech = features[0]['speechiness']
+            maxTempo = features[0]['tempo']
+            maxValence = features[0]['valence']
+        
         acoustic += features[0]['acousticness']
         danceable += features[0]['danceability']
         energy += features[0]['energy']
@@ -78,6 +119,44 @@ def generateRecs():
         speech += features[0]['speechiness']
         tempo += features[0]['tempo']
         valence += features[0]['valence']
+
+        if i >= 1:
+            if features[0]['acousticness'] <= minAcoustic:
+                minAcoustic = features[0]['acousticness']
+            if features[0]['acousticness'] >= maxAcoustic:
+                maxAcoustic = features[0]['acousticness']
+            if features[0]['danceability'] <= minDanceable:
+                minDanceable = features[0]['danceability']
+            if features[0]['danceability'] >= maxDanceable:
+                maxDanceable = features[0]['danceability']
+            if features[0]['energy'] <= minEnergy:
+                minEnergy = features[0]['energy']
+            if features[0]['energy'] >= maxEnergy:
+                maxEnergy = features[0]['energy']
+            if features[0]['instrumentalness'] <= minInstrumental:
+                minInstrumental = features[0]['instrumentalness']
+            if features[0]['instrumentalness'] >= maxInstrumental:
+                maxInstrumental = features[0]['instrumentalness']
+            if features[0]['liveness'] <= minLive:
+                minLive = features[0]['liveness']
+            if features[0]['liveness'] >= maxLive:
+                maxLive = features[0]['liveness']
+            if features[0]['loudness'] <= minLoud:
+                minLoud = features[0]['loudness']
+            if features[0]['loudness'] >= maxLoud:
+                maxLoud = features[0]['loudness']
+            if features[0]['speechiness'] <= minSpeech:
+                minSpeech = features[0]['speechiness']
+            if features[0]['speechiness'] >= maxSpeech:
+                maxSpeech = features[0]['speechiness']
+            if features[0]['tempo'] <= minTempo:
+                minTempo = features[0]['tempo']
+            if features[0]['tempo'] >= maxTempo:
+                maxTempo = features[0]['tempo']
+            if features[0]['valence'] <= minValence:
+                minValence = features[0]['valence']
+            if features[0]['valence'] >= maxValence:
+                maxValence = features[0]['valence']
 
         artist = item['artists'][0]['name'].encode("utf-16")
         song = item['name'].encode("utf-16")
