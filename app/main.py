@@ -18,17 +18,28 @@ Session(app)
 
 scope = "user-library-read,user-top-read,playlist-modify-public,playlist-modify-private"
 sp = None
+username = ""
 
 cachesFolder = './.spotifyCache/'
 
 if not os.path.exists(cachesFolder):
     os.makedirs(cachesFolder)
 
+
 def session_cache_path():
     return cachesFolder + session.get('uuid')
 
 @bp.route('/')
 def index():
+    return render_template('base.html')
+
+@bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        global username
+        username = request.form['username']
+        return redirect('/login')
+
     if not session.get('uuid'):
         session['uuid'] = str(uuid.uuid4())
 
@@ -37,7 +48,7 @@ def index():
 
     if request.args.get('code'):
         auth_manager.get_access_token(request.args.get('code'))
-        return redirect('/')
+        return redirect('/login')
     
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
         auth_url = auth_manager.get_authorize_url()
@@ -45,18 +56,18 @@ def index():
 
     global sp
     sp = spotipy.Spotify(auth_manager=auth_manager)
+    return redirect('/submit')
 
-    return render_template('base.html')
 
-
-@bp.route('/submit', methods=['POST'])
+@bp.route('/submit')
 def generateRecs():
 
     #Retrieves spotify client
     global sp
+    global username
 
     #Gets username from user input
-    username = request.form['username']
+    #username = request.form['username']
 
     #Define audio feature variables
     acoustic = 0.0
@@ -85,8 +96,6 @@ def generateRecs():
     #Get top 50 long-term tracks and their audio features. Only 10 will be displayed to the user, though
     res = sp.current_user_top_tracks(limit=50, time_range="long_term")
 
-    print("Top 10 Long-Term Tracks")
-    print("------------------------------------")
     #Display top 10 tracks and accumulate audio feature values from all top 50 tracks
     for i, item in enumerate(res['items']):
         features = sp.audio_features(item['id'])
@@ -158,17 +167,10 @@ def generateRecs():
             if features[0]['valence'] >= maxValence:
                 maxValence = features[0]['valence']
 
-        artist = item['artists'][0]['name'].encode("utf-16")
-        song = item['name'].encode("utf-16")
-
         #Basically hardcoded track and artist seeds
         if i < 1:
             trackSeed.append(item['id'])
             artistSeed.append(item['artists'][0]['id'])
-        #Only prints first 10 tracks
-        if i < 10:
-            print(i+1, artist, "-", song)
-    print("------------------------------------")
 
     #Get average audio feature values
     acoustic /= 50.0
@@ -201,6 +203,15 @@ def generateRecs():
         seed_tracks=trackSeed,
         seed_artists=artistSeed,
         seed_genres=genreSeed,
+        min_accousticness="{:.2f}".format(minAcoustic),
+        min_danceability="{:.2f}".format(minDanceable),
+        min_energy="{:.2f}".format(minEnergy),
+        min_instrumentalness="{:.2f}".format(minInstrumental),
+        min_liveness="{:.2f}".format(minLive),
+        min_loudness="{:.2f}".format(minLoud),
+        min_speechiness="{:.2f}".format(minSpeech),
+        min_tempo="{:.2f}".format(minTempo),
+        min_valence="{:.2f}".format(minValence),
         target_acousticness="{:.2f}".format(acoustic),
         target_danceability="{:.2f}".format(danceable),
         target_energy="{:.2f}".format(energy),
@@ -210,6 +221,15 @@ def generateRecs():
         target_speechiness="{:.2f}".format(speech),
         target_tempo="{:.2f}".format(tempo),
         target_valence="{:.2f}".format(valence),
+        max_accousticness="{:.2f}".format(maxAcoustic),
+        max_danceability="{:.2f}".format(maxDanceable),
+        max_energy="{:.2f}".format(maxEnergy),
+        max_instrumentalness="{:.2f}".format(maxInstrumental),
+        max_liveness="{:.2f}".format(maxLive),
+        max_loudness="{:.2f}".format(maxLoud),
+        max_speechiness="{:.2f}".format(maxSpeech),
+        max_tempo="{:.2f}".format(maxTempo),
+        max_valence="{:.2f}".format(maxValence),
         limit=100,
         )
 
